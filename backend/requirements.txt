@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+pillow
+numpy
+torch
+torchvision
+google-genai
+git+https://github.com/openai/CLIP.git
+python-dotenv
