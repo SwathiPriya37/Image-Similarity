@@ -2,9 +2,10 @@ interface ResultsSectionProps {
   score: number;
   image1: string | null;
   image2: string | null;
+  explanation?: string; // ✅ added optional prop
 }
 
-export const ResultsSection = ({ score, image1, image2 }: ResultsSectionProps) => {
+export const ResultsSection = ({ score, image1, image2, explanation }: ResultsSectionProps) => {
   const getDescription = (score: number) => {
     if (score >= 90) {
       return "The images share a high degree of similarity in color palette, composition, and subject matter.";
@@ -54,9 +55,19 @@ export const ResultsSection = ({ score, image1, image2 }: ResultsSectionProps) =
         )}
       </div>
 
-      <p className="text-muted-foreground text-sm leading-relaxed text-center">
+      {/* Description based on score */}
+      <p className="text-muted-foreground text-sm leading-relaxed text-center mb-4">
         {getDescription(score)}
       </p>
+
+      {/* ✅ Optional backend explanation */}
+      {explanation && (
+        <div className="mt-4 bg-muted/20 p-4 rounded-md">
+          <p className="text-muted-foreground text-sm leading-relaxed text-center italic">
+            {explanation}
+          </p>
+        </div>
+      )}
     </div>
   );
 };

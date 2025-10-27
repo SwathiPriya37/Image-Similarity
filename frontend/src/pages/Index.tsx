@@ -5,68 +5,89 @@ import { ResultsSection } from "@/components/ResultsSection";
 import { toast } from "sonner";
 
 const Index = () => {
-  const [image1, setImage1] = useState<string | null>(null);
-  const [image2, setImage2] = useState<string | null>(null);
+  const [image1, setImage1] = useState<File | null>(null);
+  const [image2, setImage2] = useState<File | null>(null);
   const [showResults, setShowResults] = useState(false);
-  const [similarityScore, setSimilarityScore] = useState(0);
+  const [similarityScore, setSimilarityScore] = useState<number | null>(null);
+  const [explanation, setExplanation] = useState<string>("");
 
-  const handleImage1Select = (file: File) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      setImage1(e.target?.result as string);
-      setShowResults(false);
-    };
-    reader.readAsDataURL(file);
+  // Handles file selection for both uploads
+  const handleImageSelect = (
+    file: File,
+    setImage: React.Dispatch<React.SetStateAction<File | null>>
+  ) => {
+    setImage(file);
+    setShowResults(false);
   };
 
-  const handleImage2Select = (file: File) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      setImage2(e.target?.result as string);
-      setShowResults(false);
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const handleComputeSimilarity = () => {
+  // Main similarity computation
+  const handleComputeSimilarity = async () => {
     if (!image1 || !image2) {
       toast.error("Please upload both images before computing similarity");
       return;
     }
 
-    // Simulate computation with a random score
-    const score = Math.floor(Math.random() * 30) + 70; // Random score between 70-100
-    setSimilarityScore(score);
-    setShowResults(true);
-    toast.success("Similarity computed successfully!");
+    const formData = new FormData();
+    formData.append("image1", image1);
+    formData.append("image2", image2);
+
+    try {
+      const toastId = toast.loading("Comparing images using Gemini AI...");
+
+      const response = await fetch("http://127.0.0.1:8000/compare/", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) throw new Error("Server error");
+
+      const data = await response.json();
+
+      // Expecting: { similarity: 87.5, explanation: "Both images contain cats in similar poses" }
+      setSimilarityScore(data.similarity);
+      setExplanation(data.explanation || "No explanation provided.");
+      setShowResults(true);
+
+      toast.success("Similarity computed successfully!", { id: toastId });
+    } catch (error) {
+      console.error(error);
+      toast.error("Error computing similarity. Please check your backend.", {
+        duration: 4000,
+      });
+    } finally {
+      toast.dismiss();
+    }
   };
 
   return (
     <div className="min-h-screen bg-background py-12 px-8">
       <div className="max-w-7xl mx-auto">
+        {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-5xl font-bold text-foreground mb-4">
             Image Similarity Checker
           </h1>
           <p className="text-muted-foreground text-lg">
-            Upload two images to compare their similarity.
+            Upload two images to compare their similarity using Gemini AI.
           </p>
         </div>
 
-        <div className="grid grid-cols-2 gap-6 mb-8">
+        {/* Upload Sections */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           <ImageUploadZone
             label="Image 1"
-            onImageSelect={handleImage1Select}
-            image={image1}
+            onImageSelect={(file) => handleImageSelect(file, setImage1)}
+            image={image1 ? URL.createObjectURL(image1) : null}
           />
 
           <ImageUploadZone
             label="Image 2"
-            onImageSelect={handleImage2Select}
-            image={image2}
+            onImageSelect={(file) => handleImageSelect(file, setImage2)}
+            image={image2 ? URL.createObjectURL(image2) : null}
           />
         </div>
 
+        {/* Action Button */}
         <Button
           onClick={handleComputeSimilarity}
           className="w-full h-14 text-lg font-semibold"
@@ -75,12 +96,14 @@ const Index = () => {
           Compute Similarity
         </Button>
 
-        {showResults && (
+        {/* Results Section */}
+        {showResults && similarityScore !== null && (
           <div className="mt-12">
             <ResultsSection
               score={similarityScore}
-              image1={image1}
-              image2={image2}
+              image1={image1 ? URL.createObjectURL(image1) : ""}
+              image2={image2 ? URL.createObjectURL(image2) : ""}
+              explanation={explanation}
             />
           </div>
         )}
