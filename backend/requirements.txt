@@ -4,6 +4,6 @@ pillow
 numpy
 torch
 torchvision
-google-genai
+google-generative-ai
 git+https://github.com/openai/CLIP.git
 python-dotenv
