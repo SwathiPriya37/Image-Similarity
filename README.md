@@ -1,7 +1,6 @@
 # 🧠 Image Similarity Checker
 
-This full-stack project compares two uploaded images using **ResNet50** embeddings and **cosine similarity**,  
-then uses **Google Gemini AI** to generate a natural-language explanation of how similar the images are.
+This project lets you upload two images, compares them using **ResNet50** and **cosine similarity**, and then uses **Google Gemini AI** to explain how similar the images are in simple words.
 
 ---
 
