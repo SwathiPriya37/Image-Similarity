@@ -15,9 +15,6 @@ then uses **Google Gemini AI** to generate a natural-language explanation of how
 
 ---
 
-
----
-
 ## ⚙️ Tech Stack
 
 | Layer | Technology |
